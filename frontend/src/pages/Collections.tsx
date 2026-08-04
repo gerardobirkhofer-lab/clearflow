@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 
+const STATUS_OPTIONS = ['ALL', 'MATCHED', 'UNMATCHED', 'DISCREPANCY', 'PENDING', 'PARTIAL'];
+
 interface Collection {
   id: string;
   collection_date: string;
@@ -25,6 +27,9 @@ export default function Collections() {
   const [items, setItems] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState('ALL');
+
+  const filteredItems = filter === 'ALL' ? items : items.filter(i => i.status === filter);
 
   useEffect(() => {
     fetch('/api/v1/collections')
@@ -39,8 +44,19 @@ export default function Collections() {
 
   return (
     <div>
-      <h1>Card Collections</h1>
-      <p style={{ color: '#64748b' }}>{items.length} total collections</p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+        <div>
+          <h1 style={{ margin: 0 }}>Card Collections</h1>
+          <p style={{ color: '#64748b', margin: '4px 0 0 0' }}>{filteredItems.length} of {items.length} collections</p>
+        </div>
+        <select
+          value={filter}
+          onChange={e => setFilter(e.target.value)}
+          style={{ padding: '8px 16px', borderRadius: 6, border: '1px solid #e2e8f0', fontSize: 14, cursor: 'pointer', background: '#fff' }}
+        >
+          {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s === 'ALL' ? 'All Statuses' : s}</option>)}
+        </select>
+      </div>
       <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 16, background: '#fff', borderRadius: 8, overflow: 'hidden', border: '1px solid #e2e8f0' }}>
         <thead>
           <tr style={{ background: '#f1f5f9', textAlign: 'left' }}>
@@ -53,7 +69,7 @@ export default function Collections() {
           </tr>
         </thead>
         <tbody>
-          {items.map(item => (
+          {filteredItems.map(item => (
             <tr key={item.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
               <td style={{ padding: '12px 16px', fontFamily: 'monospace', fontSize: 13 }}>{item.reference}</td>
               <td style={{ padding: '12px 16px' }}>{item.collection_date}</td>
