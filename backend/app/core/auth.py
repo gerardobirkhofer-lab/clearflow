@@ -30,3 +30,17 @@ async def get_current_user(
         tenant_id=UUID(os.getenv("DEFAULT_TENANT_ID", "22222222-2222-2222-2222-222222222222")),
         role="OWNER",
     )
+
+
+def require_role(allowed_roles: list[str]):
+    """Dependency factory that checks if the current user has an allowed role."""
+    async def role_checker(
+        current_user: CurrentUser = Depends(get_current_user),
+    ) -> CurrentUser:
+        if current_user.role.upper() not in [r.upper() for r in allowed_roles]:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Insufficient permissions",
+            )
+        return current_user
+    return role_checker
