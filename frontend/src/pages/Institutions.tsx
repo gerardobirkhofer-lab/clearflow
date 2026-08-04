@@ -15,7 +15,7 @@ export default function Institutions() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/api/institutions')
+    fetch('/api/v1/institutions')
       .then(r => r.json())
       .then(data => {
         setItems(data);
